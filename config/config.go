@@ -5,12 +5,17 @@ import (
 )
 
 type Config struct {
-	Server *Server
+	Server   *Server
+	DataBase *DataBase `toml:"data_base"`
 }
 
 type Server struct {
 	Address string
 	Timeout int // in seconds
+}
+
+type DataBase struct {
+	URL string `toml:"url"`
 }
 
 func Make() *Config {

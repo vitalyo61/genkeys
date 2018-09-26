@@ -21,12 +21,12 @@ func TestServer(t *testing.T) {
 
 	resp, err := http.Get("http://localhost:8080/health")
 	if err != nil {
-		t.Fatal(err.Error())
+		t.Fatal(err)
 	}
 	ass.Equal(resp.StatusCode, http.StatusOK)
 
 	err = srv.Stop()
 	if err != nil {
-		t.Fatal(err.Error())
+		t.Fatal(err)
 	}
 }
