@@ -14,7 +14,7 @@ func TestConfig(t *testing.T) {
 
 	file, err := ioutil.TempFile("", "temp")
 	if err != nil {
-		ass.Fail(err.Error())
+		t.Fatal(err.Error())
 	}
 	defer os.Remove(file.Name())
 
@@ -28,18 +28,18 @@ timeout = %d
 
 	_, err = file.Write([]byte(config))
 	if err != nil {
-		ass.Fail(err.Error())
+		t.Fatal(err.Error())
 	}
 
 	err = file.Close()
 	if err != nil {
-		ass.Fail(err.Error())
+		t.Fatal(err.Error())
 	}
 
 	conf := Make()
 	err = conf.Open(file.Name())
 	if err != nil {
-		ass.Fail(err.Error())
+		t.Fatal(err.Error())
 	}
 
 	ass.Equal(conf.Server.Address, addr)
