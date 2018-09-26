@@ -2,6 +2,7 @@ package generator
 
 import (
 	"fmt"
+	"math"
 	"regexp"
 )
 
@@ -61,4 +62,24 @@ func (g *Generator) NextCode() ([]byte, bool) {
 		return g.lastCode, false
 	}
 	return g.lastCode, true
+}
+
+func countChar(b byte) (count float64) {
+	switch {
+	case b >= '\x30' && b <= '\x39':
+		count = float64(b - '\x30')
+	case b >= '\x41' && b <= '\x4A':
+		count = float64(b - '\x41' + 10)
+	default:
+		count = float64(b - '\x61' + 36)
+	}
+	return
+}
+
+func (g *Generator) FreeCount() uint32 {
+	var count float64 = math.Pow(62.0, 4.0) - 1.0
+	for i, c := range g.lastCode {
+		count -= math.Pow(62.0, 3.0-float64(i)) * countChar(c)
+	}
+	return uint32(count)
 }

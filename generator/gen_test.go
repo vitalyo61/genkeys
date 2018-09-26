@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -60,4 +61,38 @@ func TestGen(t *testing.T) {
 		ass.Equal(ok, tg.ok)
 		ass.Equal(string(nextCode), tg.next)
 	}
+}
+
+func TestCount(t *testing.T) {
+	ass := assert.New(t)
+
+	code := "zA90"
+	count := countChar(code[3])
+	ass.Equal(count, 0.0)
+	count = countChar(code[2])
+	ass.Equal(count, 9.0)
+	count = countChar(code[1])
+	ass.Equal(count, 10.0)
+	count = countChar(code[0])
+	ass.Equal(count, 61.0)
+
+	c, err := Make("zzzz")
+	ass.NoError(err)
+	ass.Equal(c.FreeCount(), uint32(0))
+
+	c, err = Make("zzzy")
+	ass.NoError(err)
+	ass.Equal(c.FreeCount(), uint32(1))
+
+	c, err = Make("zzz0")
+	ass.NoError(err)
+	ass.Equal(c.FreeCount(), uint32(math.Pow(62.0, 1.0)-1))
+
+	c, err = Make("zz00")
+	ass.NoError(err)
+	ass.Equal(c.FreeCount(), uint32(math.Pow(62.0, 2.0)-1))
+
+	c, err = Make("0000")
+	ass.NoError(err)
+	ass.Equal(c.FreeCount(), uint32(math.Pow(62.0, 4.0)-1))
 }
