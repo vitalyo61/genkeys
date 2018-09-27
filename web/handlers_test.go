@@ -23,6 +23,10 @@ func TestHandlers(t *testing.T) {
 	}
 	defer db.Close()
 
+	cLast, err := db.CodeLast()
+	ass.Error(err)
+	ass.Equal(cLast.Number, "")
+
 	chData := make(chan *generator.Data)
 
 	router := makeRouter(db, chData)
@@ -131,6 +135,10 @@ func TestHandlers(t *testing.T) {
 	body, _ = ioutil.ReadAll(result.Body)
 	ass.Equal(result.StatusCode, http.StatusOK)
 	ass.Equal(string(body), fmt.Sprintf("%d", count))
+
+	cLast, err = db.CodeLast()
+	ass.NoError(err)
+	ass.Equal(cLast.Number, "0001")
 
 	ch := make(chan *generator.Result)
 	chData <- &generator.Data{

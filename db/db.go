@@ -61,6 +61,16 @@ func (db *DB) CodeExtinguish(number string) error {
 		})
 }
 
+func (db *DB) CodeLast() (*model.Code, error) {
+	conn := db.session.Copy()
+	coll := conn.DB(db.name).C(db.codeCollection)
+	defer conn.Close()
+
+	c := new(model.Code)
+	err := coll.Find(nil).Sort("-_id").One(c)
+	return c, err
+}
+
 func (db *DB) CodeRemove(number string) error {
 	conn := db.session.Copy()
 	coll := conn.DB(db.name).C(db.codeCollection)
