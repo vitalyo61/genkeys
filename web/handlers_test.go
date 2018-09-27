@@ -38,7 +38,7 @@ func TestHandlers(t *testing.T) {
 	}()
 
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest(http.MethodGet, "/get", nil)
+	r := httptest.NewRequest(http.MethodGet, "/generate", nil)
 
 	router.ServeHTTP(w, r)
 
@@ -48,7 +48,7 @@ func TestHandlers(t *testing.T) {
 	ass.Equal(string(body), "0000")
 
 	w = httptest.NewRecorder()
-	r = httptest.NewRequest(http.MethodGet, "/get", nil)
+	r = httptest.NewRequest(http.MethodGet, "/generate", nil)
 
 	router.ServeHTTP(w, r)
 
@@ -56,6 +56,33 @@ func TestHandlers(t *testing.T) {
 	body, _ = ioutil.ReadAll(result.Body)
 	ass.Equal(result.StatusCode, http.StatusOK)
 	ass.Equal(string(body), "0001")
+
+	w = httptest.NewRecorder()
+	r = httptest.NewRequest(http.MethodGet, "/extinguish/0000", nil)
+
+	router.ServeHTTP(w, r)
+
+	result = w.Result()
+	body, _ = ioutil.ReadAll(result.Body)
+	ass.Equal(result.StatusCode, http.StatusOK)
+
+	w = httptest.NewRecorder()
+	r = httptest.NewRequest(http.MethodGet, "/extinguish/0000", nil)
+
+	router.ServeHTTP(w, r)
+
+	result = w.Result()
+	body, _ = ioutil.ReadAll(result.Body)
+	ass.Equal(result.StatusCode, http.StatusInternalServerError)
+
+	w = httptest.NewRecorder()
+	r = httptest.NewRequest(http.MethodGet, "/extinguish/0003", nil)
+
+	router.ServeHTTP(w, r)
+
+	result = w.Result()
+	body, _ = ioutil.ReadAll(result.Body)
+	ass.Equal(result.StatusCode, http.StatusInternalServerError)
 
 	err = db.CodeRemove("0000")
 	ass.NoError(err)

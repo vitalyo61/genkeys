@@ -2,6 +2,7 @@ package db
 
 import (
 	"github.com/globalsign/mgo"
+	"github.com/globalsign/mgo/bson"
 	"github.com/vitalyo61/genkeys/db/model"
 )
 
@@ -35,14 +36,19 @@ func (db *DB) CodeSet(code *model.Code) error {
 	return coll.Insert(code)
 }
 
-func (db *DB) CodeGet(number string) (*model.Code, error) {
+func (db *DB) CodeExtinguish(number string) error {
 	conn := db.session.Copy()
 	coll := conn.DB(db.name).C(db.codeCollection)
 	defer conn.Close()
 
-	c := new(model.Code)
-	err := coll.FindId(number).One(c)
-	return c, err
+	return coll.Update(
+		bson.M{
+			"_id":    bson.M{"$eq": number},
+			"status": bson.M{"$eq": model.CodeYes},
+		},
+		bson.M{
+			"$set": bson.M{"status": model.CodeStop},
+		})
 }
 
 func (db *DB) CodeRemove(number string) error {

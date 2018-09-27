@@ -14,7 +14,8 @@ func makeRouter(b *db.DB, ch chan *generator.Data) http.Handler {
 	r.HandleFunc("/health", func(http.ResponseWriter, *http.Request) {})
 	r.Use(setContentType)
 
-	r.Handle("/get", makeGetHandler(b, ch)).Methods(http.MethodGet)
+	r.Handle("/generate", makeGenerateHandler(b, ch)).Methods(http.MethodGet)
+	r.Handle("/extinguish/{code}", makeExtinguishHandler(b)).Methods(http.MethodGet)
 
 	return r
 }
