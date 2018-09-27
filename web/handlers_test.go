@@ -84,6 +84,40 @@ func TestHandlers(t *testing.T) {
 	body, _ = ioutil.ReadAll(result.Body)
 	ass.Equal(result.StatusCode, http.StatusInternalServerError)
 
+	result = w.Result()
+	body, _ = ioutil.ReadAll(result.Body)
+	ass.Equal(result.StatusCode, http.StatusInternalServerError)
+
+	w = httptest.NewRecorder()
+	r = httptest.NewRequest(http.MethodGet, "/info/0003", nil)
+
+	router.ServeHTTP(w, r)
+
+	result = w.Result()
+	body, _ = ioutil.ReadAll(result.Body)
+	ass.Equal(result.StatusCode, http.StatusOK)
+	ass.Equal(string(body), "не выдан")
+
+	w = httptest.NewRecorder()
+	r = httptest.NewRequest(http.MethodGet, "/info/0001", nil)
+
+	router.ServeHTTP(w, r)
+
+	result = w.Result()
+	body, _ = ioutil.ReadAll(result.Body)
+	ass.Equal(result.StatusCode, http.StatusOK)
+	ass.Equal(string(body), "выдан")
+
+	w = httptest.NewRecorder()
+	r = httptest.NewRequest(http.MethodGet, "/info/0000", nil)
+
+	router.ServeHTTP(w, r)
+
+	result = w.Result()
+	body, _ = ioutil.ReadAll(result.Body)
+	ass.Equal(result.StatusCode, http.StatusOK)
+	ass.Equal(string(body), "погашен")
+
 	err = db.CodeRemove("0000")
 	ass.NoError(err)
 	err = db.CodeRemove("0001")

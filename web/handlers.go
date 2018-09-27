@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/globalsign/mgo"
 	"github.com/gorilla/mux"
 	"github.com/vitalyo61/genkeys/db"
 	"github.com/vitalyo61/genkeys/db/model"
@@ -62,15 +63,13 @@ func (h *generateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type extinguishHandler struct {
-	dBase *db.DB
-	// chGen   chan *generator.Data
+	dBase   *db.DB
 	errHead string
 }
 
 func makeExtinguishHandler(b *db.DB) http.Handler {
 	return &extinguishHandler{
-		dBase: b,
-		// chGen:   ch,
+		dBase:   b,
 		errHead: "extinguish code:",
 	}
 }
@@ -83,6 +82,35 @@ func (h *extinguishHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%s %s\n", h.errHead, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		_, err = w.Write([]byte(err.Error()))
+	}
+
+	if err != nil {
+		log.Printf("%s %s\n", h.errHead, err)
+	}
+}
+
+type infoHandler struct {
+	dBase   *db.DB
+	errHead string
+}
+
+func makeInfoHandler(b *db.DB) http.Handler {
+	return &infoHandler{
+		dBase:   b,
+		errHead: "info code:",
+	}
+}
+
+func (h *infoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	number := mux.Vars(r)["code"]
+
+	code, err := h.dBase.CodeGet(number)
+	if err != nil && err != mgo.ErrNotFound {
+		log.Printf("%s %s\n", h.errHead, err)
+		w.WriteHeader(http.StatusInternalServerError)
+		_, err = w.Write([]byte(err.Error()))
+	} else {
+		_, err = w.Write([]byte(code.GetStatus()))
 	}
 
 	if err != nil {

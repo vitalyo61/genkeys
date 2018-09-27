@@ -36,6 +36,16 @@ func (db *DB) CodeSet(code *model.Code) error {
 	return coll.Insert(code)
 }
 
+func (db *DB) CodeGet(number string) (*model.Code, error) {
+	conn := db.session.Copy()
+	coll := conn.DB(db.name).C(db.codeCollection)
+	defer conn.Close()
+
+	c := new(model.Code)
+	err := coll.FindId(number).One(c)
+	return c, err
+}
+
 func (db *DB) CodeExtinguish(number string) error {
 	conn := db.session.Copy()
 	coll := conn.DB(db.name).C(db.codeCollection)
