@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/vitalyo61/genkeys/config"
+	"github.com/vitalyo61/genkeys/db"
+	"github.com/vitalyo61/genkeys/generator"
 )
 
 type Server struct {
@@ -15,7 +17,7 @@ type Server struct {
 	timeout time.Duration
 }
 
-func Make(cfg *config.Server) *Server {
+func Make(cfg *config.Server, b *db.DB, ch chan *generator.Data) *Server {
 	return &Server{
 		srv: &http.Server{
 			Addr:              cfg.Address,
@@ -23,7 +25,7 @@ func Make(cfg *config.Server) *Server {
 			ReadHeaderTimeout: time.Second * time.Duration(cfg.Timeout),
 			WriteTimeout:      time.Second * time.Duration(cfg.Timeout),
 			IdleTimeout:       time.Second * time.Duration(cfg.Timeout),
-			Handler:           makeRouter(),
+			Handler:           makeRouter(b, ch),
 		},
 	}
 }

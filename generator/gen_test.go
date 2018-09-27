@@ -36,6 +36,16 @@ func TestGen(t *testing.T) {
 		ok      bool
 	}{
 		{
+			current: "",
+			next:    "0000",
+			ok:      true,
+		},
+		{
+			current: "0000",
+			next:    "0001",
+			ok:      true,
+		},
+		{
 			current: "zza9",
 			next:    "zzaA",
 			ok:      true,
@@ -57,7 +67,7 @@ func TestGen(t *testing.T) {
 		if err != nil {
 			t.Fatal(err.Error())
 		}
-		nextCode, ok := g.NextCode()
+		nextCode, ok := g.nextCode()
 		ass.Equal(ok, tg.ok)
 		ass.Equal(string(nextCode), tg.next)
 	}

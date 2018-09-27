@@ -16,7 +16,7 @@ func TestServer(t *testing.T) {
 		Address: addr,
 		Timeout: 10,
 	}
-	srv := Make(cfg)
+	srv := Make(cfg, nil, nil)
 	go srv.Start()
 
 	resp, err := http.Get("http://localhost:8080/health")

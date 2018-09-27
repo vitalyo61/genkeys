@@ -1,5 +1,11 @@
 package model
 
+const (
+	CodeNo   = 0
+	CodeYes  = 1
+	CodeStop = 2
+)
+
 type Code struct {
 	Number string `bson:"_id"`
 	Status int    `bson:"status"`
@@ -7,11 +13,11 @@ type Code struct {
 
 func (c *Code) GetStatus() string {
 	switch c.Status {
-	case 0:
+	case CodeNo:
 		return "не выдан"
-	case 1:
+	case CodeYes:
 		return "выдан"
-	case 2:
+	case CodeStop:
 		return "погашен"
 	}
 	return "неопределен"
