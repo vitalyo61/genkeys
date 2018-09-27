@@ -1,7 +1,9 @@
 package web
 
 import (
+	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -117,6 +119,47 @@ func TestHandlers(t *testing.T) {
 	body, _ = ioutil.ReadAll(result.Body)
 	ass.Equal(result.StatusCode, http.StatusOK)
 	ass.Equal(string(body), "погашен")
+
+	count := uint32(math.Pow(62.0, 4.0) - 2)
+
+	w = httptest.NewRecorder()
+	r = httptest.NewRequest(http.MethodGet, "/count", nil)
+
+	router.ServeHTTP(w, r)
+
+	result = w.Result()
+	body, _ = ioutil.ReadAll(result.Body)
+	ass.Equal(result.StatusCode, http.StatusOK)
+	ass.Equal(string(body), fmt.Sprintf("%d", count))
+
+	ch := make(chan *generator.Result)
+	chData <- &generator.Data{
+		Cmd:      generator.CmdSet,
+		ChanCode: ch,
+		Code:     "zzzz",
+	}
+	res := <-ch
+	ass.NoError(res.Error)
+
+	w = httptest.NewRecorder()
+	r = httptest.NewRequest(http.MethodGet, "/count", nil)
+
+	router.ServeHTTP(w, r)
+
+	result = w.Result()
+	body, _ = ioutil.ReadAll(result.Body)
+	ass.Equal(result.StatusCode, http.StatusOK)
+	ass.Equal(string(body), fmt.Sprintf("%d", 0))
+
+	w = httptest.NewRecorder()
+	r = httptest.NewRequest(http.MethodGet, "/generate", nil)
+
+	router.ServeHTTP(w, r)
+
+	result = w.Result()
+	body, _ = ioutil.ReadAll(result.Body)
+	ass.Equal(result.StatusCode, http.StatusServiceUnavailable)
+	ass.Equal(string(body), generator.ErrorEndSequence.Error())
 
 	err = db.CodeRemove("0000")
 	ass.NoError(err)

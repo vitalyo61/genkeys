@@ -11,6 +11,8 @@ import (
 const (
 	CmdGet = iota
 	CmdStop
+	CmdCount
+	CmdSet
 )
 
 var (
@@ -19,6 +21,7 @@ var (
 
 type Data struct {
 	Cmd      int
+	Code     string
 	ChanCode chan *Result
 }
 
@@ -33,25 +36,9 @@ type Generator struct {
 }
 
 func Make(code string) (*Generator, error) {
-	if code == "" {
-		return &Generator{
-			lastCode: []byte("0000"),
-			start:    true,
-		}, nil
-	}
-
-	ok, err := regexp.MatchString(`^\w{4}$`, code)
-	if err != nil {
-		return nil, err
-	}
-	if !ok {
-		return nil, fmt.Errorf("bad code: %s", code)
-	}
-
-	return &Generator{
-		lastCode: []byte(code),
-		start:    false,
-	}, nil
+	gen := new(Generator)
+	err := gen.set(code)
+	return gen, err
 }
 
 func addChar(b byte) (byte, bool) {
@@ -64,6 +51,26 @@ func addChar(b byte) (byte, bool) {
 		return '\x30', true
 	}
 	return byte(int(b) + 1), false
+}
+
+func (g *Generator) set(code string) error {
+	if code == "" {
+		g.lastCode = []byte("0000")
+		g.start = true
+		return nil
+	}
+
+	ok, err := regexp.MatchString(`^\w{4}$`, code)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("bad code: %s", code)
+	}
+
+	g.lastCode = []byte(code)
+	g.start = false
+	return nil
 }
 
 func (g *Generator) nextCode() ([]byte, bool) {
@@ -101,8 +108,8 @@ func countChar(b byte) (count float64) {
 	return
 }
 
-func (g *Generator) FreeCount() uint32 {
-	var count float64 = math.Pow(62.0, 4.0) - 1.0
+func (g *Generator) freeCount() uint32 {
+	var count float64 = math.Pow(62.0, 4.0) - 1
 	if !g.start {
 		for i, c := range g.lastCode {
 			count -= math.Pow(62.0, 3.0-float64(i)) * countChar(c)
@@ -122,6 +129,12 @@ func (g *Generator) Start(ch chan *Data) {
 				if res.Code, ok = g.nextCode(); !ok {
 					res.Error = ErrorEndSequence
 				}
+				d.ChanCode <- res
+			case CmdCount:
+				res.Code = []byte(fmt.Sprintf("%d", g.freeCount()))
+				d.ChanCode <- res
+			case CmdSet:
+				res.Error = g.set(d.Code)
 				d.ChanCode <- res
 			case CmdStop:
 				log.Println("Generator stop")

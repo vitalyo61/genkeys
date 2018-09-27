@@ -117,3 +117,36 @@ func (h *infoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%s %s\n", h.errHead, err)
 	}
 }
+
+type countHandler struct {
+	dBase   *db.DB
+	chGen   chan *generator.Data
+	errHead string
+}
+
+func makeCountHandler(b *db.DB, ch chan *generator.Data) http.Handler {
+	return &countHandler{
+		dBase:   b,
+		chGen:   ch,
+		errHead: "count code:",
+	}
+}
+
+func (h *countHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var err error
+
+	chResult := make(chan *generator.Result)
+	data := &generator.Data{
+		Cmd:      generator.CmdCount,
+		ChanCode: chResult,
+	}
+
+	h.chGen <- data
+	res := <-chResult
+
+	_, err = w.Write(res.Code)
+
+	if err != nil {
+		log.Printf("%s %s\n", h.errHead, err)
+	}
+}

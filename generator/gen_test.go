@@ -88,21 +88,21 @@ func TestCount(t *testing.T) {
 
 	c, err := Make("zzzz")
 	ass.NoError(err)
-	ass.Equal(c.FreeCount(), uint32(0))
+	ass.Equal(c.freeCount(), uint32(0))
 
-	c, err = Make("zzzy")
+	err = c.set("zzzy")
 	ass.NoError(err)
-	ass.Equal(c.FreeCount(), uint32(1))
+	ass.Equal(c.freeCount(), uint32(1))
 
-	c, err = Make("zzz0")
+	err = c.set("zzz0")
 	ass.NoError(err)
-	ass.Equal(c.FreeCount(), uint32(math.Pow(62.0, 1.0)-1))
+	ass.Equal(c.freeCount(), uint32(math.Pow(62.0, 1.0)-1))
 
-	c, err = Make("zz00")
+	err = c.set("zz00")
 	ass.NoError(err)
-	ass.Equal(c.FreeCount(), uint32(math.Pow(62.0, 2.0)-1))
+	ass.Equal(c.freeCount(), uint32(math.Pow(62.0, 2.0)-1))
 
-	c, err = Make("0000")
+	err = c.set("0000")
 	ass.NoError(err)
-	ass.Equal(c.FreeCount(), uint32(math.Pow(62.0, 4.0)-1))
+	ass.Equal(c.freeCount(), uint32(math.Pow(62.0, 4.0)-1))
 }
